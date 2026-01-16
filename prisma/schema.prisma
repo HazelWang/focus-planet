@@ -1,0 +1,66 @@
+// Prisma Schema for Focus Planet
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 用户模型
+model User {
+  id              String          @id @default(cuid())
+  name            String
+  email           String?         @unique
+  color           String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  // 关联
+  focusSessions   FocusSession[]
+  roomMemberships RoomMember[]
+}
+
+// 房间模型
+model Room {
+  id          String       @id @default(cuid())
+  roomCode    String       @unique
+  name        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // 关联
+  members     RoomMember[]
+}
+
+// 房间成员关联表
+model RoomMember {
+  id          String    @id @default(cuid())
+  userId      String
+  roomId      String
+  joinedAt    DateTime  @default(now())
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room        Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, roomId])
+}
+
+// 专注记录模型
+model FocusSession {
+  id              String    @id @default(cuid())
+  userId          String
+  roomId          String?
+  startTime       DateTime
+  endTime         DateTime?
+  duration        Int       @default(0) // 持续时间（秒）
+  completed       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([roomId])
+}
