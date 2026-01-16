@@ -25,14 +25,14 @@
 
 ### 方法 1: 一键安装（推荐）
 
-\`\`\`bash
+```bash
 chmod +x setup.sh
 ./setup.sh
-\`\`\`
+```
 
 ### 方法 2: 手动安装
 
-\`\`\`bash
+```bash
 # 1. 创建 .env 文件
 echo 'DATABASE_URL="file:./dev.db"' > .env
 
@@ -45,39 +45,39 @@ npm run db:push
 
 # 4. 添加测试数据（可选）
 npm run db:seed
-\`\`\`
+```
 
 ## 🎯 使用
 
 ### 开发模式
 
-\`\`\`bash
+```bash
 # 启动开发服务器
 npm run dev
 
 # （可选）在另一个终端打开数据库管理界面
 npm run db:studio
-\`\`\`
+```
 
 打开 [http://localhost:3000](http://localhost:3000) 查看应用。
 打开 [http://localhost:5555](http://localhost:5555) 查看数据库（如果运行了 db:studio）。
 
 ### 生产构建
 
-\`\`\`bash
+```bash
 npm run build
 npm start
-\`\`\`
+```
 
 ### 数据库命令
 
-\`\`\`bash
+```bash
 npm run db:generate  # 生成 Prisma Client
 npm run db:push      # 同步数据库结构
 npm run db:studio    # 打开数据库管理界面
 npm run db:migrate   # 创建数据库迁移
 npm run db:seed      # 运行种子数据
-\`\`\`
+```
 
 ## 💡 使用说明
 
@@ -118,7 +118,7 @@ npm run db:seed      # 运行种子数据
 
 ## 📁 项目结构
 
-\`\`\`
+```
 focus-planet/
 ├── app/
 │   ├── api/                # API 路由
@@ -144,7 +144,7 @@ focus-planet/
 ├── server.js               # Socket.io 服务器
 ├── setup.sh                # 一键安装脚本
 └── package.json
-\`\`\`
+```
 
 ## 🔧 配置
 
@@ -152,15 +152,15 @@ focus-planet/
 
 编辑 `lib/store.ts`：
 
-\`\`\`typescript
+```typescript
 focusDuration: 25 * 60 * 1000, // 改为你想要的时长
-\`\`\`
+```
 
 ### 切换数据库
 
 编辑 `.env` 文件：
 
-\`\`\`env
+```env
 # SQLite（默认）
 DATABASE_URL="file:./dev.db"
 
@@ -169,9 +169,9 @@ DATABASE_URL="postgresql://user:password@localhost:5432/focusplanet"
 
 # MySQL
 DATABASE_URL="mysql://user:password@localhost:3306/focusplanet"
-\`\`\`
+```
 
-更多配置请查看 [DATABASE_README.md](./DATABASE_README.md)
+更多配置请查看 [DATABASE.md](./DATABASE.md)
 
 ## 🚀 部署到 Vercel
 
