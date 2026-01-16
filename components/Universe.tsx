@@ -3,8 +3,8 @@
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Stars } from '@react-three/drei'
 import { Planet } from './Planet'
-import { useStore } from '@/lib/store'
-import { useRef, useMemo } from 'react'
+import { useStore, useRoomUsers } from '@/lib/store'
+import { useRef } from 'react'
 import { Mesh } from 'three'
 
 // 装饰性星球组件
@@ -36,11 +36,14 @@ function DecorativePlanet() {
 
 // Scene 组件 - 将场景内容分离出来
 function Scene() {
-  const users = useStore((state) => state.users)
+  const roomId = useStore((state) => state.roomId)
   const userId = useStore((state) => state.userId)
   
-  // 将用户转换为数组
-  const usersArray = useMemo(() => Array.from(users.values()), [users])
+  // 🔥 使用 SWR 获取房间用户状态
+  const { users } = useRoomUsers(roomId)
+  
+  // users 已经是数组格式
+  const usersArray = users
   
   return (
     <>

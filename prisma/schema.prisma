@@ -41,11 +41,19 @@ model RoomMember {
   userId      String
   roomId      String
   joinedAt    DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt  // 添加默认值
+  
+  // 实时状态字段（用于 SWR 轮询）
+  isFocusing      Boolean   @default(false)
+  focusStartTime  DateTime?
+  totalFocusTime  Int       @default(0)  // 累计专注时间（秒）
+  lastActiveAt    DateTime  @default(now())  // 最后活跃时间
   
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   room        Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
   
   @@unique([userId, roomId])
+  @@index([roomId, lastActiveAt])  // 优化查询活跃用户
 }
 
 // 专注记录模型

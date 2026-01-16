@@ -13,6 +13,7 @@ import { useStore } from '@/lib/store'
 
 export default function Home() {
   const roomId = useStore((state) => state.roomId)
+  const leaveRoom = useStore((state) => state.leaveRoom)
   const [isLoading, setIsLoading] = useState(true)
   
   useEffect(() => {
@@ -23,6 +24,48 @@ export default function Home() {
     
     return () => clearTimeout(timer)
   }, [])
+  
+  // 监听页面卸载，离开房间
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (roomId) {
+        // 使用 fetch with keepalive 确保请求在页面卸载时也能发送
+        const { dbUserId } = useStore.getState()
+        if (dbUserId) {
+          fetch(`/api/room-status?roomId=${roomId}&userId=${dbUserId}`, {
+            method: 'DELETE',
+            keepalive: true // 关键：即使页面关闭也会发送
+          }).catch(() => {
+            // 忽略错误，页面即将关闭
+          })
+        }
+      }
+    }
+    
+    const handleVisibilityChange = async () => {
+      // 当标签页隐藏超过 3 秒时，标记为不活跃
+      if (document.hidden && roomId) {
+        // 延迟 3 秒再离开，避免快速切换标签页时误判
+        setTimeout(() => {
+          if (document.hidden) {
+            leaveRoom()
+          }
+        }, 3000)
+      }
+    }
+    
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      // 组件卸载时离开房间
+      if (roomId) {
+        leaveRoom()
+      }
+    }
+  }, [roomId, leaveRoom])
   
   if (isLoading) {
     return <LoadingScreen />

@@ -1,24 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useStore } from '@/lib/store'
+import { useStore, useRoomUsers } from '@/lib/store'
 import { Copy, Users, Check } from 'lucide-react'
 import { nanoid } from 'nanoid'
 
 export function RoomPanel() {
-  const { roomId, users, joinRoom, userName, setUserName, initSocket, userColor, setDbUserId } = useStore()
+  const { roomId, joinRoom, userName, setUserName, userColor, setDbUserId } = useStore()
   const [inputName, setInputName] = useState('')
   const [inputRoom, setInputRoom] = useState('')
   const [copied, setCopied] = useState(false)
   const [isJoining, setIsJoining] = useState(!roomId)
   
+  // 🔥 使用 SWR 获取房间用户
+  const { users } = useRoomUsers(roomId)
+  
   useEffect(() => {
-    // 初始化 Socket 连接
-    const socket = useStore.getState().socket
-    if (!socket) {
-      initSocket()
-    }
-    
     // 检查 URL 中是否有房间 ID
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
@@ -71,11 +68,9 @@ export function RoomPanel() {
   }
   
   const getTotalFocusTime = () => {
-    let total = 0
-    users.forEach((user) => {
-      total += user.totalFocusTime
-    })
-    return Math.floor(total / (1000 * 60)) // 转换为分钟
+    // users 现在是数组
+    const total = users.reduce((sum, user) => sum + user.totalFocusTime, 0)
+    return Math.floor(total / 60) // totalFocusTime 已经是秒，转换为分钟
   }
   
   if (isJoining) {
@@ -142,7 +137,7 @@ export function RoomPanel() {
           房间信息
         </h3>
         <span className="text-sm text-gray-400">
-          {users.size} 人在线
+          {users.length} 人在线
         </span>
       </div>
       
@@ -179,7 +174,7 @@ export function RoomPanel() {
         </div>
         <div className="bg-gray-800 rounded-lg p-4">
           <div className="text-2xl font-bold text-green-500">
-            {Array.from(users.values()).filter(u => u.isFocused).length}
+            {users.filter(u => u.isFocused).length}
           </div>
           <div className="text-sm text-gray-400">正在专注</div>
         </div>
@@ -189,7 +184,7 @@ export function RoomPanel() {
       <div className="space-y-2">
         <h4 className="text-sm font-medium text-gray-400">在线成员</h4>
         <div className="space-y-2 max-h-48 overflow-y-auto">
-          {Array.from(users.values()).map((user) => (
+          {users.map((user) => (
             <div
               key={user.id}
               className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg"
@@ -201,7 +196,7 @@ export function RoomPanel() {
               <div className="flex-1">
                 <div className="text-white font-medium">{user.name}</div>
                 <div className="text-xs text-gray-400">
-                  {Math.floor(user.totalFocusTime / (1000 * 60))} 分钟专注
+                  {Math.floor(user.totalFocusTime / 60)} 分钟专注
                 </div>
               </div>
               {user.isFocused && (
